@@ -14,10 +14,13 @@ import (
 func GroupBlogRoute(api fiber.Router) fiber.Router {
 	blogRoutes := api.Group("/blogs", temporaryLogger)
 
+	blogRoutes.Get("/", handlers.GetAllBlogs)
+	blogRoutes.Post("/", handlers.PostBlog)
+
+	blogRoutes.Get("/:id/comments", handlers.GetComments)
+	blogRoutes.Post("/:id/comments", handlers.PostComment)
+	
 	blogRoutes.Get("/:id", handlers.GetABlog)
-	blogRoutes.Get("/", func (c *fiber.Ctx) error {
-		return c.SendString("UNIMPLEMENTED: Get all blogs")
-	})
 
 	return blogRoutes
 }

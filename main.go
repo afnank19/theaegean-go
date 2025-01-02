@@ -11,7 +11,6 @@ import (
 func main() {
 	PORT := ":8081"
 
-
 	config.InitializeFirebase("/home/afnank19/Desktop/development/personal/go-theaegean/secrets/the-sapphire-19ba8-firebase-adminsdk-fu3od-d725600a17.json")
 
 	// Fiber setup
@@ -22,7 +21,6 @@ func main() {
 
 	api := app.Group("/api")
 	api = routes.GroupBlogRoute(api)
-
 
 	app.Listen(PORT)
 }

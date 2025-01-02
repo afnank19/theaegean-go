@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
-	"log"
 
-	"github.com/afnank19/theaegean-go/config"
+	"github.com/afnank19/theaegean-go/services"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -14,13 +12,23 @@ func GetABlog(c *fiber.Ctx) error {
 	blogId := c.Params("id")
 	fmt.Println(blogId)
 
-	fStoreClient, err := config.GetFirestoreClient()
-	if err != nil {
-		 log.Fatalln(err)
-	}
+	response := services.FetchABlogById(blogId)
+	
+	return c.JSON(response)
+}
 
-	dSnap, _ := fStoreClient.Collection("blogContent").Doc(blogId).Get(context.Background())
+func GetAllBlogs(c *fiber.Ctx) error {
+	return c.SendString("UNIMPLEMENTED: Fetch all blogs (paginated)")
+}
 
-	m := dSnap.Data()
-	return c.JSON(m)
+func PostBlog(c *fiber.Ctx) error {
+	return c.SendString("UNIMPLEMENTED: Add blog data to db")
+}
+
+func GetComments(c *fiber.Ctx) error {
+	return c.SendString("UNIMPLEMENTED: Fetch a blogs respective comments")
+}
+
+func PostComment(c *fiber.Ctx) error {
+	return c.SendString("UNIMPLEMENTED: Add comment data to db")
 }
