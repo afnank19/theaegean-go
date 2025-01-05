@@ -5,6 +5,7 @@ import (
 
 	"github.com/afnank19/theaegean-go/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 // New beginnings
@@ -15,6 +16,7 @@ func main() {
 
 	// Fiber setup
 	app := fiber.New()
+	app.Use(recover.New())
 	app.Get("/", func (c *fiber.Ctx) error {
 		return c.SendString("We're up alive and healthy")
 	})
