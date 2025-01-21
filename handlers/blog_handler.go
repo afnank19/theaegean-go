@@ -26,7 +26,21 @@ func PostBlog(c *fiber.Ctx) error {
 }
 
 func GetComments(c *fiber.Ctx) error {
-	return c.SendString("UNIMPLEMENTED: Fetch a blogs respective comments")
+
+	blogId := c.Params("id")
+
+	lastDocId := c.Query("lastDocId")
+	fmt.Println("handler: " + lastDocId)
+
+	response, err := services.FetchBlogComments(blogId, lastDocId)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "I did this on purpose")
+	}
+
+
+	fmt.Println(response)
+
+	return c.JSON(response)
 }
 
 func PostComment(c *fiber.Ctx) error {
