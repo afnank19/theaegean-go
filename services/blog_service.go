@@ -23,7 +23,7 @@ func FetchABlogById(blogContentId string) map[string]interface{}  {
 	return blogContent;
 }
 
-func FetchBlogComments(blogContentId, lastDocId string) ([]*firestore.DocumentSnapshot, error){
+func FetchBlogComments(blogContentId, lastDocId string) ([]map[string]interface{}, error){
 	db, err := config.GetFirestoreClient()
 	if err != nil {
 		log.Fatalln(err)
@@ -33,11 +33,18 @@ func FetchBlogComments(blogContentId, lastDocId string) ([]*firestore.DocumentSn
 		// Split this up, horrible readability
 		docSnap, _ := db.Collection("blogContent").Doc(blogContentId).Collection("comments").OrderBy("postDate", firestore.Desc).Limit(5).Documents(context.Background()).GetAll()
 
+		// can be a helper function
+		var results []map[string]interface{}
 		for _, doc := range docSnap {
-			fmt.Println(doc.Data())
+			data := make(map[string]interface{})
+			if err := doc.DataTo(&data); err != nil {
+				log.Printf("failed to unmarshal document %s: %v", doc.Ref.ID, err)
+				continue
+			}
+			results = append(results, data)
 		}
-
-		return docSnap, nil
+	
+		return results, nil
 	}
 
 	lastDocSnap, _ := db.Collection("blogContent").Doc(blogContentId).Collection("comments").Doc(lastDocId).Get(context.Background())
@@ -46,9 +53,56 @@ func FetchBlogComments(blogContentId, lastDocId string) ([]*firestore.DocumentSn
 	docSnap, _ := db.Collection("blogContent").Doc(blogContentId).Collection("comments").OrderBy("postDate", firestore.Desc).Limit(5).StartAfter(lastDocSnap).Documents(context.Background()).GetAll()
 
 	// Add this to a map or something to send back, not just print it
+	var results []map[string]interface{}
 	for _, doc := range docSnap {
-		fmt.Println(doc.Data())
+		data := make(map[string]interface{})
+		if err := doc.DataTo(&data); err != nil {
+			log.Printf("failed to unmarshal document %s: %v", doc.Ref.ID, err)
+			continue
+		}
+		results = append(results, data)
 	}
 
-	return docSnap, nil
+	return results, nil
+}
+
+func FetchUserBlogs(userId, lastDocId string) ([]map[string]interface{}, error){
+	fmt.Println("UNIMPLEMENTED: Fetch blogs by a user(Paginated)")
+
+	db, err := config.GetFirestoreClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if lastDocId == "" {
+		docSnap, _ := db.Collection("blogMeta").Where("authorId", "==", userId).OrderBy("postDate", firestore.Desc).Limit(5).Documents(context.Background()).GetAll()
+
+		var results []map[string]interface{}
+		for _, doc := range docSnap {
+			data := make(map[string]interface{})
+			if err := doc.DataTo(&data); err != nil {
+				log.Printf("failed to unmarshal document %s: %v", doc.Ref.ID, err)
+				continue
+			}
+			results = append(results, data)
+		}
+	
+		return results, nil
+	}
+
+	lastDocSnap, _ := db.Collection("blogMeta").Doc(lastDocId).Get(context.Background())
+
+	docSnap, _ := db.Collection("blogMeta").Where("authorId", "==", userId).OrderBy("postDate", firestore.Desc).Limit(5).StartAfter(lastDocSnap).Documents(context.Background()).GetAll()
+
+	var results []map[string]interface{}
+	for _, doc := range docSnap {
+		data := make(map[string]interface{})
+		if err := doc.DataTo(&data); err != nil {
+			log.Printf("failed to unmarshal document %s: %v", doc.Ref.ID, err)
+			continue
+		}
+		results = append(results, data)
+	}
+	
+	return results, nil
 }
